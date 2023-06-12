@@ -62,7 +62,7 @@ function fillCircle(x, y, r) {
 function fillRect(x, y, w, h) {
     ctx.fillRect(x, y, w, h);
 }
-gh = "https://raw.githubusercontent.com/tomamic/fondinfo/master/examples/";
+gh = "https://raw.githubusercontent.com/tomamic/fondinfo/master/";
 loadElement = (tag, src) => {
   if (loaded[src]) return loaded[src];
   var elem = document.createElement(tag); elem.src = src;
