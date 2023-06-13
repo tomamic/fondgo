@@ -20,6 +20,7 @@ func init() {
     doc.Call("getElementsByTagName", "body").Call("item", 0).Call("appendChild", elem)
 }
 
+
 func Prompt(a ...interface{}) string {
     UpdateCanvas()
     return js.Global.Call("prompt", fmt.Sprint(a...)).String()

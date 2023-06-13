@@ -20,6 +20,7 @@ var prevKeys = make(map[string]bool)
 var jss = make([]string, 0)
 var answers = make([]string, 0)
 var channelAnswer = make(chan string)
+var channelInit = make(chan bool)
 var inited, done = false, false
 var script = `
 window.onload = (e) => { invokeExternal("connect"); };

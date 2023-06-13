@@ -2,7 +2,7 @@ package g2d
 
 type Actor interface {
     Move(arena *Arena)
-    Collide(other Actor)
+    //Collide(other Actor)
     Pos() Point
     Size() Point
     Sprite() Point
@@ -12,10 +12,12 @@ type Arena struct {
     w, h   int
     actors []Actor
     currKeys, prevKeys map[string]bool
+    collisions [][]Actor
+    turn   int
 }
 
 func NewArena(size Point) *Arena {
-    a := &Arena{size.X, size.Y, []Actor{}, make(map[string]bool), make(map[string]bool)}
+    a := &Arena{size.X, size.Y, []Actor{}, make(map[string]bool), make(map[string]bool), [][]Actor{}, -1}
     return a
 }
 
@@ -43,29 +45,40 @@ func (a *Arena) Contains(actor Actor) bool {
     return false
 }
 
+func (a *Arena) Collisions() []Actor {
+  if a.turn < 0 || a.turn >= len(a.collisions) {
+    return []Actor{}
+  }
+    return a.collisions[a.turn]
+}
+
 func (a *Arena) Tick(currKeys, prevKeys map[string]bool) {
     a.currKeys = currKeys
     a.prevKeys = prevKeys
+    a.collisions = make([][]Actor, len(a.actors))
     actors := a.ReversedActors()
-    for _, actor := range actors {
-        actor.Move(a)
-        for _, other := range actors {
-            if actor != other && a.CheckCollision(actor, other) {
-                actor.Collide(other)
-                other.Collide(actor)
-            }
+    for i, v := range actors {
+        a.collisions[i] = []Actor{}
+        for _, w := range actors {
+          if v != w && CheckCollision(v, w) {
+            a.collisions[i] = append(a.collisions[i], w)
+          }
         }
+    }
+
+    for t, actor := range actors {
+        a.turn = t
+        actor.Move(a)
     }
 }
 
-func (a *Arena) CheckCollision(a1, a2 Actor) bool {
+func CheckCollision(a1, a2 Actor) bool {
     p1 := a1.Pos()
     s1 := a1.Size()
     p2 := a2.Pos()
     s2 := a2.Size()
-    return (p2.X < p1.X+s1.X && p1.X < p2.X+s2.X &&
-        p2.Y < p1.Y+s1.Y && p1.Y < p2.Y+s2.Y &&
-        a.Contains(a1) && a.Contains(a2))
+    return (p2.X <= p1.X+s1.X && p1.X <= p2.X+s2.X &&
+        p2.Y <= p1.Y+s1.Y && p1.Y <= p2.Y+s2.Y)
 }
 
 func (a *Arena) Actors() []Actor {

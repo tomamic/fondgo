@@ -15,6 +15,23 @@ func NewBall(arena *Arena, pos Point) *Ball {
 }
 
 func (a *Ball) Move(arena *Arena) {
+    for _, other := range arena.Collisions() {
+          _, ok := other.(*Ghost)
+        if !ok {
+            op := other.Pos()
+            if op.X < a.x {
+                a.dx = a.speed
+            } else {
+                a.dx = -a.speed
+            }
+            if op.Y < a.y {
+                a.dy = a.speed
+            } else {
+                a.dy = -a.speed
+            }
+        }
+    }
+
     as := a.arena.Size()
     if !(0 <= a.x+a.dx && a.x+a.dx <= as.X-a.w) {
         a.dx = -a.dx
@@ -38,22 +55,6 @@ func (a *Ball) Sprite() Point {
     return Point{0, 0}
 }
 
-func (a *Ball) Collide(other Actor) {
-    _, ok := other.(*Ghost)
-    if !ok {
-        op := other.Pos()
-        if op.X < a.x {
-            a.dx = a.speed
-        } else {
-            a.dx = -a.speed
-        }
-        if op.Y < a.y {
-            a.dy = a.speed
-        } else {
-            a.dy = -a.speed
-        }
-    }
-}
 
 type Ghost struct {
     arena      *Arena
@@ -95,8 +96,6 @@ func (a *Ghost) Sprite() Point {
     return Point{20, 20}
 }
 
-func (a *Ghost) Collide(other Actor) {
-}
 
 type Turtle struct {
     arena         *Arena
@@ -111,6 +110,12 @@ func NewTurtle(arena *Arena, pos Point) *Turtle {
 }
 
 func (a *Turtle) Move(arena *Arena) {
+    for _, other := range arena.Collisions() {
+        _, ok := other.(*Ball)
+        if ok {
+            arena.Kill(a)
+        }
+    }
     a.dx = 0
     a.dy = 0
     keys := arena.CurrentKeys()
@@ -139,9 +144,6 @@ func (a *Turtle) Move(arena *Arena) {
         a.y = as.Y - a.h
     }
 
-}
-
-func (a *Turtle) Collide(other Actor) {
 }
 
 func (a *Turtle) Pos() Point {
@@ -183,7 +185,7 @@ var game = NewBounceGame()
 */
 
 var arena = NewArena(Point{480, 360})
-var hero = NewTurtle(arena, Point{80, 80})
+var hero = NewTurtle(arena, Point{280, 180})
 var ball1 = NewBall(arena, Point{40, 80})
 var ball2 = NewBall(arena, Point{80, 40})
 var ghost = NewGhost(arena, Point{120, 80})

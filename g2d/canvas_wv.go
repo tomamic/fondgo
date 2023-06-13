@@ -11,7 +11,6 @@ import "github.com/webview/webview"
 
 var w webview.WebView = nil
 var channelDone = make(chan bool)
-var channelInit = make(chan bool)
 var channelAddr = make(chan string)
 
 var indexHTML = `
